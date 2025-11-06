@@ -1,27 +1,26 @@
-import React from 'react';
-import { Database, Globe, Reddit, Twitter } from 'lucide-react';
+import { Database, Rocket, FileSpreadsheet } from "lucide-react";
 
 export default function Header() {
   return (
-    <div className="max-w-6xl mx-auto px-4 pt-10 pb-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-            Web Data → CSV Studio
-          </h1>
-          <p className="mt-2 text-slate-600 max-w-3xl">
-            Collect content from webpages, public datasets, and social threads, then
-            review and export a clean CSV. This interface is ready to connect to a
-            backend scraper for full automation.
-          </p>
-        </div>
-        <div className="hidden sm:flex items-center gap-3 text-slate-600">
-          <Globe className="w-5 h-5" />
-          <Reddit className="w-5 h-5" />
-          <Twitter className="w-5 h-5" />
-          <Database className="w-5 h-5" />
+    <header className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-3 rounded-full bg-slate-800/70 px-3 py-1 text-slate-300 ring-1 ring-white/10 backdrop-blur">
+              <Database className="h-4 w-4" />
+              <span className="text-xs">Web → Structured CSV</span>
+            </div>
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Smart Web Data Collector</h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">
+              Add links to web pages, Reddit threads, X posts, or public datasets. Preview a clean table and export to CSV.
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center gap-3 text-slate-300">
+            <Rocket className="h-5 w-5" />
+            <FileSpreadsheet className="h-5 w-5" />
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

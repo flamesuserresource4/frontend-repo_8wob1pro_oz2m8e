@@ -1,48 +1,46 @@
-import React from 'react';
-import { Globe, Reddit, Twitter, Table, Trash2 } from 'lucide-react';
+import { Globe, Reddit, Twitter, Database, Trash2 } from "lucide-react";
 
-const typeIcon = (type) => {
-  const common = 'w-4 h-4';
-  if (type === 'reddit') return <Reddit className={common} />;
-  if (type === 'x') return <Twitter className={common} />;
-  if (type === 'dataset') return <Table className={common} />;
-  return <Globe className={common} />;
+const typeIcon = {
+  web: Globe,
+  reddit: Reddit,
+  x: Twitter,
+  dataset: Database,
 };
 
-export default function SourcesList({ items, onRemove }) {
-  if (!items.length) {
+export default function SourcesList({ sources, onRemove }) {
+  if (!sources.length) {
     return (
-      <div className="w-full text-center text-slate-500 text-sm">
-        No sources added yet. Paste a URL above to get started.
+      <div className="rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+        No sources yet. Add a few links to get started.
       </div>
     );
   }
 
   return (
-    <ul className="divide-y divide-slate-200 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      {items.map((s) => (
-        <li key={s.id} className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="shrink-0 inline-flex items-center justify-center rounded-md bg-slate-100 p-2 text-slate-700">
-              {typeIcon(s.type)}
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">
-                {s.value}
-              </p>
-              <p className="text-xs text-slate-500">{s.type.toUpperCase()} • {new Date(s.createdAt).toLocaleString()}</p>
+    <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+      {sources.map((s) => {
+        const Icon = typeIcon[s.type] || Globe;
+        return (
+          <li key={s.id} className="flex items-center justify-between gap-3 p-3">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-700">
+                <Icon className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-slate-800">{s.url}</p>
+                <p className="text-xs text-slate-500">{s.type}</p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={() => onRemove(s.id)}
-            className="text-slate-500 hover:text-red-600 inline-flex items-center gap-1"
-            aria-label="Remove source"
-          >
-            <Trash2 className="w-4 h-4" />
-            Remove
-          </button>
-        </li>
-      ))}
+            <button
+              onClick={() => onRemove(s.id)}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              Remove
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }

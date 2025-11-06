@@ -1,87 +1,91 @@
-import React, { useMemo } from 'react';
+import { useMemo } from "react";
+import { FileSpreadsheet, Table } from "lucide-react";
 
 function toCSV(rows) {
-  if (!rows.length) return '';
+  if (!rows.length) return "";
   const headers = Object.keys(rows[0]);
-  const escape = (val) => {
-    if (val === null || val === undefined) return '';
-    const s = String(val);
-    if (/[",\n]/.test(s)) {
-      return '"' + s.replace(/"/g, '""') + '"';
+  const escape = (v) => {
+    const s = String(v ?? "");
+    if (s.includes(",") || s.includes("\n") || s.includes('"')) {
+      return '"' + s.replaceAll('"', '""') + '"';
     }
     return s;
   };
-  const lines = [headers.join(',')];
-  for (const r of rows) {
-    lines.push(headers.map((h) => escape(r[h])).join(','));
-  }
-  return lines.join('\n');
+  const lines = [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))];
+  return lines.join("\n");
 }
 
-export default function DatasetPreview({ items }) {
+export default function DatasetPreview({ sources }) {
   const rows = useMemo(() => {
-    // For the demo, synthesize simple rows from source entries
-    return items.map((s, i) => ({
-      id: i + 1,
+    // Synthesize a simple preview from the sources list
+    return sources.map((s, idx) => ({
+      id: idx + 1,
       source_type: s.type,
-      source_url: s.value,
-      captured_at: s.createdAt,
-      title: 'Sample title from ' + s.type,
-      snippet: 'Lorem ipsum preview extracted from the source.'
+      url: s.url,
+      title: `Sample title for ${new URL(s.url).hostname}`,
+      snippet: `Preview snippet generated from ${s.type} content`,
     }));
-  }, [items]);
+  }, [sources]);
 
-  const csv = useMemo(() => toCSV(rows), [rows]);
-
-  const download = () => {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const download = ()n  => {
+    const csv = toCSV(rows);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'dataset.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dataset.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-        <h3 className="text-sm font-semibold text-slate-800">Dataset Preview</h3>
+    <div className="rounded-lg border border-slate-200 bg-white">
+      <div className="flex items-center justify-between border-b border-slate-200 p-3">
+        <div className="flex items-center gap-2 text-slate-700">
+          <Table className="h-4 w-4" />
+          <span className="text-sm font-medium">Dataset Preview</span>
+        </div>
         <button
           onClick={download}
-          disabled={!rows.length}
-          className="inline-flex items-center bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium px-3 py-1.5 rounded-md"
+          className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-emerald-700"
         >
-          Download CSV
+          <FileSpreadsheet className="h-4 w-4" />
+          Export CSV
         </button>
       </div>
 
-      <div className="overflow-auto max-h-80">
-        <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-50 sticky top-0">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-slate-200 text-sm">
+          <thead className="bg-slate-50">
             <tr>
-              {rows.length > 0 && Object.keys(rows[0]).map((h) => (
-                <th key={h} className="px-4 py-2 font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap">
-                  {h}
-                </th>
-              ))}
+              <th className="px-3 py-2 text-left font-semibold text-slate-700">ID</th>
+              <th className="px-3 py-2 text-left font-semibold text-slate-700">Type</th>
+              <th className="px-3 py-2 text-left font-semibold text-slate-700">URL</th>
+              <th className="px-3 py-2 text-left font-semibold text-slate-700">Title</th>
+              <th className="px-3 py-2 text-left font-semibold text-slate-700">Snippet</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-200">
             {rows.length === 0 ? (
               <tr>
-                <td className="px-4 py-6 text-slate-500" colSpan={6}>No data yet. Add sources to build your dataset.</td>
+                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
+                  Add sources to see a preview here.
+                </td>
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} className="odd:bg-white even:bg-slate-50">
-                  {Object.keys(r).map((k) => (
-                    <td key={k} className="px-4 py-2 border-b border-slate-100 max-w-[22rem] truncate" title={String(r[k])}>
-                      {String(r[k])}
-                    </td>
-                  ))}
+                <tr key={r.id} className="hover:bg-slate-50">
+                  <td className="px-3 py-2 text-slate-700">{r.id}</td>
+                  <td className="px-3 py-2 capitalize text-slate-700">{r.source_type}</td>
+                  <td className="max-w-[280px] truncate px-3 py-2 text-indigo-600 underline decoration-indigo-300 underline-offset-2">
+                    <a href={r.url} target="_blank" rel="noreferrer">
+                      {r.url}
+                    </a>
+                  </td>
+                  <td className="px-3 py-2 text-slate-700">{r.title}</td>
+                  <td className="px-3 py-2 text-slate-600">{r.snippet}</td>
                 </tr>
               ))
             )}
